@@ -130,7 +130,7 @@ export function ParameterSidebar({
               Acquisition
             </span>
             <Badge variant="secondary" className="font-mono text-[10px]">
-              {inputs.squareFeet.toLocaleString()} SF
+              {inputs.leasableArea.toLocaleString()} ㎡
             </Badge>
           </div>
 
@@ -138,31 +138,31 @@ export function ParameterSidebar({
             label="Purchase Price"
             value={inputs.purchasePrice}
             unit=""
-            min={10_000_000}
-            max={120_000_000}
-            step={500_000}
+            min={10_000_000_000}
+            max={150_000_000_000}
+            step={1_000_000_000}
             onChange={(v) => onChange({ purchasePrice: v })}
-            format={(v) => `$${(v / 1_000_000).toFixed(1)}M`}
+            format={(v) => `${(v / 100_000_000).toFixed(0)}억`}
           />
           <ParamRow
             label="Rentable Area"
-            value={inputs.squareFeet}
-            unit="SF"
-            min={50_000}
-            max={1_000_000}
-            step={5_000}
-            onChange={(v) => onChange({ squareFeet: v })}
-            format={(v) => (v / 1000).toFixed(0) + 'k'}
+            value={inputs.leasableArea}
+            unit="㎡"
+            min={5_000}
+            max={100_000}
+            step={1_000}
+            onChange={(v) => onChange({ leasableArea: v })}
+            format={(v) => v.toLocaleString()}
           />
           <ParamRow
             label="Base Rent"
-            value={inputs.rentPsf}
-            unit="/SF"
-            min={4}
-            max={30}
-            step={0.1}
-            onChange={(v) => onChange({ rentPsf: v })}
-            format={(v) => `$${v.toFixed(2)}`}
+            value={inputs.rentPerSqm}
+            unit="/㎡/년"
+            min={50_000}
+            max={300_000}
+            step={5_000}
+            onChange={(v) => onChange({ rentPerSqm: v })}
+            format={(v) => `${(v / 10000).toFixed(0)}만`}
           />
 
           <Separator />

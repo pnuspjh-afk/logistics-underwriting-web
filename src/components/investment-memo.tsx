@@ -82,7 +82,7 @@ export function InvestmentMemo({
           </span>{' '}
           (
           <span className="font-mono text-foreground">
-            {fmtCurrency(inputs.purchasePrice / inputs.squareFeet)}/SF
+            {fmtCurrency(inputs.purchasePrice / inputs.leasableArea)}/㎡
           </span>
           ) underwrites to a{' '}
           <span className="font-medium text-foreground">
