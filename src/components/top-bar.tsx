@@ -1,13 +1,30 @@
-import React from 'react'
-import { Cloud, History, Share2, Check, Loader2 } from 'lucide-react'
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { SavedAnalysis } from '@/lib/analyses-store'
-import { HistoryDrawer } from '@/components/history-drawer'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Boxes, Cloud, CloudOff, Loader2, Share2, Check } from 'lucide-react'
+import { HistoryDrawer } from './history-drawer'
+import type { SavedAnalysis } from '@/lib/analyses-store'
+import { cn } from '@/lib/utils'
 
-export type SyncState = 'idle' | 'dirty' | 'syncing' | 'synced'
+export type SyncState = 'idle' | 'syncing' | 'synced' | 'dirty'
 
-interface TopBarProps {
+function timeAgo(date: Date | null) {
+  if (!date) return 'Never'
+  const s = Math.floor((Date.now() - date.getTime()) / 1000)
+  if (s < 5) return 'just now'
+  if (s < 60) return `${s}s ago`
+  const m = Math.floor(s / 60)
+  if (m < 60) return `${m}m ago`
+  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+}
+
+interface Props {
   sync: SyncState
   lastSaved: Date | null
   rows: SavedAnalysis[]
@@ -18,7 +35,7 @@ interface TopBarProps {
   shared: boolean
 }
 
-export const TopBar: React.FC<TopBarProps> = ({
+export function TopBar({
   sync,
   lastSaved,
   rows,
@@ -26,80 +43,95 @@ export const TopBar: React.FC<TopBarProps> = ({
   onLoad,
   onShare,
   sharing,
-  shared
-}) => {
+  shared,
+}: Props) {
   return (
-    <header className="flex h-14 items-center justify-between border-b border-slate-800 bg-slate-950 px-4">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 font-bold text-white">L</div>
-          <h1 className="text-sm font-bold tracking-tight text-slate-100 hidden sm:block">물류 투자 심사 터미널</h1>
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-background/80 px-4 py-3 backdrop-blur-md">
+      <div className="flex items-center gap-2.5">
+        <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <Boxes className="size-5" />
         </div>
-        
-        <div className="flex items-center gap-2 border-l border-slate-800 pl-4">
-          <SyncIndicator sync={sync} lastSaved={lastSaved} />
+        <div className="flex flex-col leading-none">
+          <span className="text-sm font-semibold">Atlas UW</span>
+          <span className="hidden text-[11px] text-muted-foreground sm:block">
+            Logistics Investment Underwriting
+          </span>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <HistoryDrawer 
-          rows={rows} 
-          loading={historyLoading} 
-          onLoad={onLoad} 
-        >
-          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-100 gap-2">
-            <History className="h-4 w-4" />
-            <span className="hidden md:inline">히스토리</span>
-          </Button>
-        </HistoryDrawer>
+        <SyncIndicator sync={sync} lastSaved={lastSaved} />
 
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <HistoryDrawer rows={rows} loading={historyLoading} onLoad={onLoad} />
+
+        <Button
+          variant="outline"
+          size="sm"
           onClick={onShare}
           disabled={sharing}
-          className="border-slate-800 bg-transparent text-slate-400 hover:bg-slate-900 hover:text-slate-100 gap-2"
         >
-          {shared ? <Check className="h-4 w-4 text-green-400" /> : <Share2 className="h-4 w-4" />}
-          <span className="hidden md:inline">{shared ? '링크 복사됨' : '공유하기'}</span>
+          {sharing ? (
+            <Loader2 data-icon="inline-start" className="animate-spin" />
+          ) : shared ? (
+            <Check data-icon="inline-start" className="text-pos" />
+          ) : (
+            <Share2 data-icon="inline-start" />
+          )}
+          <span className="hidden sm:inline">
+            {shared ? 'Link Copied' : 'Share'}
+          </span>
         </Button>
       </div>
     </header>
   )
 }
 
-function SyncIndicator({ sync, lastSaved }: { sync: SyncState; lastSaved: Date | null }) {
-  if (sync === 'syncing') {
-    return (
-      <div className="flex items-center gap-2 text-xs text-slate-500">
-        <Loader2 className="h-3 w-3 animate-spin" />
-        동기화 중...
-      </div>
-    )
-  }
-
-  if (sync === 'synced' && lastSaved) {
-    return (
-      <div className="flex items-center gap-2 text-xs text-green-500/80">
-        <Cloud className="h-3 w-3" />
-        저장 완료 ({lastSaved.toLocaleTimeString()})
-      </div>
-    )
-  }
-
-  if (sync === 'dirty') {
-    return (
-      <div className="flex items-center gap-2 text-xs text-orange-500/80">
-        <Cloud className="h-3 w-3" />
-        저장되지 않은 변경사항
-      </div>
-    )
-  }
+function SyncIndicator({
+  sync,
+  lastSaved,
+}: {
+  sync: SyncState
+  lastSaved: Date | null
+}) {
+  const map = {
+    syncing: {
+      icon: <Loader2 className="size-3.5 animate-spin" />,
+      label: 'Syncing…',
+      cls: 'border-chart-2/40 text-chart-2',
+    },
+    synced: {
+      icon: <Cloud className="size-3.5" />,
+      label: `Saved ${timeAgo(lastSaved)}`,
+      cls: 'border-pos/40 text-pos',
+    },
+    dirty: {
+      icon: <CloudOff className="size-3.5" />,
+      label: 'Unsaved changes',
+      cls: 'border-warn/40 text-warn',
+    },
+    idle: {
+      icon: <Cloud className="size-3.5" />,
+      label: 'Not saved',
+      cls: 'border-border text-muted-foreground',
+    },
+  }[sync]
 
   return (
-    <div className="flex items-center gap-2 text-xs text-slate-600">
-      <Cloud className="h-3 w-3" />
-      클라우드 연결됨
-    </div>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Badge
+            variant="outline"
+            className={cn('gap-1.5 font-normal tabular-nums', map.cls)}
+          />
+        }
+      >
+        {map.icon}
+        <span className="hidden text-xs md:inline">{map.label}</span>
+      </TooltipTrigger>
+      <TooltipContent>
+        Supabase sync status · {lastSaved ? `last write ${timeAgo(lastSaved)}` : 'no writes yet'}
+      </TooltipContent>
+    </Tooltip>
   )
 }

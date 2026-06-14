@@ -1,74 +1,124 @@
-import React from 'react'
-import { DollarSign, Shield, TrendingUp, ArrowUpRight, BarChart3 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+'use client'
 
-interface KpiGridProps {
+import { Card } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+import {
+  TrendingUp,
+  TrendingDown,
+  Banknote,
+  Shield,
+  Percent,
+  Layers,
+  type LucideIcon,
+} from 'lucide-react'
+
+interface KpiCardProps {
+  label: string
+  value: string
+  sub: string
+  icon: LucideIcon
+  tone: 'pos' | 'warn' | 'neg' | 'neutral'
+  delta?: number
+}
+
+const toneRing: Record<KpiCardProps['tone'], string> = {
+  pos: 'text-pos',
+  warn: 'text-warn',
+  neg: 'text-neg',
+  neutral: 'text-chart-2',
+}
+
+function KpiCard({ label, value, sub, icon: Icon, tone, delta }: KpiCardProps) {
+  return (
+    <Card className="glass group relative overflow-hidden border-border/80 p-0 transition-colors hover:border-primary/40">
+      <div className="flex items-start justify-between gap-3 p-4">
+        <div className="flex flex-col gap-1">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            {label}
+          </span>
+          <span className="font-mono text-2xl font-semibold tabular-nums text-foreground transition-transform duration-200 group-hover:-translate-y-px">
+            {value}
+          </span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            {typeof delta === 'number' &&
+              (delta >= 0 ? (
+                <TrendingUp className="size-3 text-pos" />
+              ) : (
+                <TrendingDown className="size-3 text-neg" />
+              ))}
+            {sub}
+          </span>
+        </div>
+        <div
+          className={cn(
+            'flex size-9 shrink-0 items-center justify-center rounded-md bg-secondary/60 ring-1 ring-inset ring-border',
+            toneRing[tone],
+          )}
+        >
+          <Icon className="size-4.5" />
+        </div>
+      </div>
+      <div
+        className={cn(
+          'h-0.5 w-full origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100',
+          tone === 'pos' && 'bg-pos',
+          tone === 'warn' && 'bg-warn',
+          tone === 'neg' && 'bg-neg',
+          tone === 'neutral' && 'bg-chart-2',
+        )}
+      />
+    </Card>
+  )
+}
+
+export { Banknote, Shield, Percent, Layers }
+
+export function KpiGrid({
+  noi,
+  dscr,
+  irr,
+  em,
+  goingInCap,
+}: {
   noi: string
   dscr: number
   irr: number
   em: number
   goingInCap: number
-}
-
-export const KpiGrid: React.FC<KpiGridProps> = ({ noi, dscr, irr, em, goingInCap }) => {
+}) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-      <Card className="bg-slate-900/50 border-slate-800">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">순영업소득 (NOI)</CardTitle>
-          <DollarSign className="h-4 w-4 text-blue-400" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{noi}</div>
-          <p className="text-xs text-slate-500 mt-1">1년차 예상 수지</p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-slate-900/50 border-slate-800">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">부채상환배수 (DSCR)</CardTitle>
-          <Shield className="h-4 w-4 text-indigo-400" />
-        </CardHeader>
-        <CardContent>
-          <div className={`text-2xl font-bold ${dscr < 1.2 ? 'text-red-400' : 'text-slate-100'}`}>
-            {dscr.toFixed(2)}x
-          </div>
-          <p className="text-xs text-slate-500 mt-1">Lender 요구치: 1.2x</p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-slate-900/50 border-slate-800">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">내부수익률 (IRR)</CardTitle>
-          <TrendingUp className="h-4 w-4 text-green-400" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-green-400">{irr.toFixed(2)}%</div>
-          <p className="text-xs text-slate-500 mt-1">지분 투자자 수익률</p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-slate-900/50 border-slate-800">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">자본배수 (EM)</CardTitle>
-          <ArrowUpRight className="h-4 w-4 text-orange-400" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{em.toFixed(2)}x</div>
-          <p className="text-xs text-slate-500 mt-1">투자 원금 대비 배수</p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-slate-900/50 border-slate-800">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">매입 캡레이트</CardTitle>
-          <BarChart3 className="h-4 w-4 text-purple-400" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{goingInCap.toFixed(2)}%</div>
-          <p className="text-xs text-slate-500 mt-1">Entry Cap Rate</p>
-        </CardContent>
-      </Card>
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <KpiCard
+        label="Year 1 NOI"
+        value={noi}
+        sub={`${goingInCap.toFixed(2)}% going-in cap`}
+        icon={Banknote}
+        tone="neutral"
+      />
+      <KpiCard
+        label="DSCR"
+        value={`${dscr.toFixed(2)}x`}
+        sub={dscr >= 1.25 ? 'Above 1.25x covenant' : 'Below covenant'}
+        icon={Shield}
+        tone={dscr >= 1.25 ? 'pos' : dscr >= 1.1 ? 'warn' : 'neg'}
+        delta={dscr >= 1.25 ? 1 : -1}
+      />
+      <KpiCard
+        label="Levered IRR"
+        value={`${irr.toFixed(1)}%`}
+        sub={irr >= 15 ? 'Exceeds 15% hurdle' : 'Below target hurdle'}
+        icon={Percent}
+        tone={irr >= 15 ? 'pos' : irr >= 10 ? 'warn' : 'neg'}
+        delta={irr >= 15 ? 1 : -1}
+      />
+      <KpiCard
+        label="Equity Multiple"
+        value={`${em.toFixed(2)}x`}
+        sub={em >= 1.8 ? 'Strong return of capital' : 'Moderate multiple'}
+        icon={Layers}
+        tone={em >= 1.8 ? 'pos' : em >= 1.4 ? 'warn' : 'neg'}
+        delta={em >= 1.8 ? 1 : -1}
+      />
     </div>
   )
 }
