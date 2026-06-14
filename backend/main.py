@@ -79,7 +79,7 @@ def _get_full_analysis_data(inputs_dict):
     cap_offsets = [-0.01, -0.005, 0.0, 0.005, 0.01]
     matrix_data = []
     for v in v_steps_2d:
-        row = {"공실률 \ 매각캡": f"{v*100:.0f}%"}
+        row = {r"공실률 \ 매각캡": f"{v*100:.0f}%"}
         for offset in cap_offsets:
             target_cap = inputs_dict['exit_cap_rate'] + offset
             res = calculator.run_underwriting({**inputs_dict, "vacancy_rate": v, "exit_cap_rate": max(0.001, target_cap)})
