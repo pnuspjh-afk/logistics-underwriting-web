@@ -2,11 +2,14 @@
 import { createClient } from '@supabase/supabase-js';
 import type { UWInputs } from './underwriting';
 
-// 환경 변수에서 Supabase 설정 로드 (사용자가 나중에 설정할 수 있도록 안내 필요)
+// 환경 변수에서 Supabase 설정 로드
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Supabase 클라이언트를 조건부로 생성하여 환경 변수가 없을 때 앱이 죽지 않도록 함
+export const supabase = (supabaseUrl && supabaseAnonKey) 
+  ? createClient(supabaseUrl, supabaseAnonKey) 
+  : null;
 
 export interface SavedAnalysis {
   id: string;
@@ -23,6 +26,11 @@ export interface SavedAnalysis {
 export const analysesTable = {
   // 전체 목록 불러오기
   async list(): Promise<SavedAnalysis[]> {
+    if (!supabase) {
+      console.warn('Supabase URL/Key가 설정되지 않았습니다. 로컬 데이터 모드로 동작합니다.');
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('analyses')
       .select('*')
@@ -39,6 +47,10 @@ export const analysesTable = {
   async insert(
     row: Omit<SavedAnalysis, 'id' | 'created_at'>
   ): Promise<SavedAnalysis> {
+    if (!supabase) {
+      throw new Error('Supabase가 연결되지 않아 저장할 수 없습니다.');
+    }
+
     const { data, error } = await supabase
       .from('analyses')
       .insert([row])
