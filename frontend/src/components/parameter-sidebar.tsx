@@ -15,7 +15,7 @@ import {
   Building2,
   SlidersHorizontal,
 } from 'lucide-react'
-import type { UWInputs } from '@/lib/underwriting'
+import { type UWInputs, fmtCompact } from '@/lib/underwriting'
 
 interface ParamRowProps {
   label: string
@@ -45,7 +45,7 @@ function ParamRow({
           {label}
         </Label>
         <span className="font-mono text-sm font-semibold tabular-nums text-foreground">
-          {format ? format(value) : value}
+          {format ? format(value) : value.toLocaleString()}
           <span className="ml-0.5 text-[10px] text-muted-foreground">
             {unit}
           </span>
@@ -86,7 +86,7 @@ export function ParameterSidebar({
     >
       <div className="flex items-center gap-2 border-b border-border px-4 py-3.5">
         <SlidersHorizontal className="size-4 text-primary" />
-        <h2 className="text-sm font-semibold">Underwriting Parameters</h2>
+        <h2 className="text-sm font-semibold">언더라이팅 파라미터</h2>
       </div>
 
       <ScrollArea className="flex-1">
@@ -99,26 +99,26 @@ export function ParameterSidebar({
                 className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
               >
                 <Building2 className="size-3" />
-                Project Name
+                프로젝트명
               </Label>
               <Input
                 id="project"
                 value={inputs.projectName}
                 onChange={(e) => onChange({ projectName: e.target.value })}
                 className="h-9 font-medium"
-                placeholder="Deal identifier"
+                placeholder="프로젝트 식별자"
               />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="asset" className="text-xs font-medium text-muted-foreground">
-                Asset / Building
+                자산 / 건물명
               </Label>
               <Input
                 id="asset"
                 value={inputs.assetName}
                 onChange={(e) => onChange({ assetName: e.target.value })}
                 className="h-9"
-                placeholder="Asset name"
+                placeholder="자산명"
               />
             </div>
           </div>
@@ -127,121 +127,120 @@ export function ParameterSidebar({
 
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Acquisition
+              자산 매입 조건
             </span>
             <Badge variant="secondary" className="font-mono text-[10px]">
-              {inputs.squareFeet.toLocaleString()} SF
+              {inputs.leasableArea.toLocaleString()} SQM
             </Badge>
           </div>
 
           <ParamRow
-            label="Purchase Price"
+            label="매입 가격"
             value={inputs.purchasePrice}
             unit=""
-            min={10_000_000}
-            max={120_000_000}
-            step={500_000}
+            min={1000000000}
+            max={200000000000}
+            step={500000000}
             onChange={(v) => onChange({ purchasePrice: v })}
-            format={(v) => `$${(v / 1_000_000).toFixed(1)}M`}
+            format={(v) => fmtCompact(v)}
           />
           <ParamRow
-            label="Rentable Area"
-            value={inputs.squareFeet}
-            unit="SF"
-            min={50_000}
-            max={1_000_000}
-            step={5_000}
-            onChange={(v) => onChange({ squareFeet: v })}
-            format={(v) => (v / 1000).toFixed(0) + 'k'}
+            label="임대 면적"
+            value={inputs.leasableArea}
+            unit="SQM"
+            min={1000}
+            max={100000}
+            step={500}
+            onChange={(v) => onChange({ leasableArea: v })}
           />
           <ParamRow
-            label="Base Rent"
-            value={inputs.rentPsf}
-            unit="/SF"
-            min={4}
-            max={30}
-            step={0.1}
-            onChange={(v) => onChange({ rentPsf: v })}
-            format={(v) => `$${v.toFixed(2)}`}
+            label="기본 임대료"
+            value={inputs.rentPerSqm}
+            unit="/SQM"
+            min={10000}
+            max={500000}
+            step={1000}
+            onChange={(v) => onChange({ rentPerSqm: v })}
+            format={(v) => v.toLocaleString()}
           />
 
           <Separator />
 
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Operating Assumptions
+            운영 가이드라인
           </span>
           <ParamRow
-            label="Stabilized Vacancy"
+            label="목표 공실률"
             value={inputs.vacancy}
             unit="%"
             min={0}
-            max={25}
+            max={30}
             step={0.5}
             onChange={(v) => onChange({ vacancy: v })}
             format={(v) => v.toFixed(1)}
           />
           <ParamRow
-            label="OpEx Ratio"
+            label="운영비(OpEx) 비율"
             value={inputs.opexRatio}
             unit="%"
-            min={10}
-            max={45}
-            step={0.5}
+            min={5}
+            max={50}
+            step={1}
             onChange={(v) => onChange({ opexRatio: v })}
-            format={(v) => v.toFixed(1)}
+            format={(v) => v.toFixed(0)}
           />
           <ParamRow
-            label="Annual Rent Growth"
+            label="연간 임대료 상승률"
             value={inputs.rentGrowth}
             unit="%"
             min={0}
-            max={8}
-            step={0.25}
+            max={10}
+            step={0.1}
             onChange={(v) => onChange({ rentGrowth: v })}
-            format={(v) => v.toFixed(2)}
+            format={(v) => v.toFixed(1)}
           />
 
           <Separator />
 
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Debt & Exit
+            금융 및 매각
           </span>
           <ParamRow
-            label="Loan-to-Value (LTV)"
+            label="LTV (담보인정비율)"
             value={inputs.ltv}
             unit="%"
             min={0}
-            max={80}
+            max={85}
             step={1}
             onChange={(v) => onChange({ ltv: v })}
             format={(v) => v.toFixed(0)}
           />
           <ParamRow
-            label="Interest Rate"
+            label="대출 금리"
             value={inputs.interestRate}
+            unit="%"
+            min={2}
+            max={12}
+            step={0.1}
+            onChange={(v) => onChange({ interestRate: v })}
+            format={(v) => v.toFixed(1)}
+          />
+          <ParamRow
+            label="매각 캡레이트 (Exit Cap)"
+            value={inputs.exitCapRate}
             unit="%"
             min={3}
             max={10}
-            step={0.05}
-            onChange={(v) => onChange({ interestRate: v })}
-            format={(v) => v.toFixed(2)}
-          />
-          <ParamRow
-            label="Exit Cap Rate"
-            value={inputs.exitCapRate}
-            unit="%"
-            min={3.5}
-            max={9}
             step={0.05}
             onChange={(v) => onChange({ exitCapRate: v })}
             format={(v) => v.toFixed(2)}
           />
           <ParamRow
-            label="Hold Period"
+            label="보유 기간"
             value={inputs.holdYears}
-            unit="yrs"
-            min={3}
-            max={10}
+            unit="년"
+            min={1}
+            max={15}
             step={1}
             onChange={(v) => onChange({ holdYears: v })}
             format={(v) => v.toFixed(0)}
@@ -261,11 +260,11 @@ export function ParameterSidebar({
           ) : (
             <Database data-icon="inline-start" />
           )}
-          {saving ? 'Saving to Supabase…' : 'Save to Supabase'}
+          {saving ? 'Supabase 저장 중…' : 'Supabase에 저장'}
         </Button>
         <p className="mt-2 flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
           <Cloud className="size-3" />
-          Persisted to your underwriting workspace
+          언더라이팅 데이터가 클라우드에 영구 저장됩니다
         </p>
       </div>
     </aside>

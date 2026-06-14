@@ -76,31 +76,31 @@ export function InvestmentMemo({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
-          The {inputs.assetName.toLowerCase()} acquisition at{' '}
+          {inputs.assetName} 자산의{' '}
           <span className="font-medium text-foreground">
             {fmtCompact(inputs.purchasePrice)}
           </span>{' '}
-          (
+          매입 건(
           <span className="font-mono text-foreground">
-            {fmtCurrency(inputs.purchasePrice / inputs.squareFeet)}/SF
+            {fmtCurrency(inputs.purchasePrice / inputs.leasableArea)}/SQM
           </span>
-          ) underwrites to a{' '}
+          )은{' '}
           <span className="font-medium text-foreground">
             {fmtPct(results.goingInCap, 2)}
           </span>{' '}
-          going-in cap and a{' '}
+          의 Entry Cap Rate와{' '}
           <span className="font-medium text-foreground">
             {fmtPct(results.irr)}
           </span>{' '}
-          levered IRR over a {inputs.holdYears}-year hold. Day-one leverage of{' '}
-          {fmtPct(inputs.ltv, 0)} LTV yields a{' '}
+          의 Levered IRR (보유기간 {inputs.holdYears}년 기준)을 보입니다. 대출 비중{' '}
+          {fmtPct(inputs.ltv, 0)} LTV 환경에서{' '}
           <span className="font-medium text-foreground">
             {fmtX(results.dscr)}
           </span>{' '}
-          DSCR{' '}
+          의 DSCR을 기록하며,{' '}
           {results.dscr >= 1.25
-            ? 'comfortably clearing the 1.25x covenant.'
-            : 'which sits inside the lender covenant band and warrants a reserve.'}
+            ? '대주단 커버넌트인 1.25x를 안정적으로 상회합니다.'
+            : '커버넌트 경계선에 위치하여 추가적인 운영 리스크 관리가 필요합니다.'}
         </p>
 
         <div className="grid gap-x-8 gap-y-0 sm:grid-cols-2">
